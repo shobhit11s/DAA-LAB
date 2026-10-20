@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define INF 1e9
+
+int n;
+int **matrix;
+int **dp;
+
+int tsp(int mask, int u) {
+    if (mask == (1 << n) - 1) {
+        return matrix[u][0] == -1 ? INF : matrix[u][0];
+    }
+    if (dp[mask][u] != -1) {
+        return dp[mask][u];
+    }
+    
+    int ans = INF;
+    for (int v = 0; v < n; v++) {
+        if (!(mask & (1 << v))) {
+            if (matrix[u][v] != -1) {
+                int cost = matrix[u][v] + tsp(mask | (1 << v), v);
+                if (cost < ans) {
+                    ans = cost;
+                }
+            }
+        }
+    }
+    return dp[mask][u] = ans;
+}
+
+int main() {
+    if (scanf("%d", &n) != 1) return 0;
+    
+    matrix = (int **)malloc(n * sizeof(int *));
+    for (int i = 0; i < n; i++) {
+        matrix[i] = (int *)malloc(n * sizeof(int));
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &matrix[i][j]);
+        }
+    }
+    
+    int num_states = 1 << n;
+    dp = (int **)malloc(num_states * sizeof(int *));
+    for (int i = 0; i < num_states; i++) {
+        dp[i] = (int *)malloc(n * sizeof(int));
+        for (int j = 0; j < n; j++) {
+            dp[i][j] = -1;
+        }
+    }
+    
+    int result = tsp(1, 0);
+    printf("%d\n", result);
+    
+    for (int i = 0; i < n; i++) free(matrix[i]);
+    free(matrix);
+    for (int i = 0; i < num_states; i++) free(dp[i]);
+    free(dp);
+    
+    return 0;
+}
+
